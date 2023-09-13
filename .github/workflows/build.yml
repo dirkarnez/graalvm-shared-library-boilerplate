@@ -116,6 +116,7 @@ jobs:
         # libenvmap.build_artifacts.txt
         # libenvmap.dll
         # libenvmap.so
+        # libenvmap.dylib
         # libenvmap.h
         # libenvmap.lib
         # libenvmap_dynamic.h
@@ -128,6 +129,7 @@ jobs:
             *.h
             *.build_artifacts.txt
             *.dll
+            *.dylib
             *.so
             *.lib
           filename: "${{ github.event.repository.name }}-${{ github.ref_name }}-graalvm-jdk-17.0.7-${{ matrix.os }}.zip"
