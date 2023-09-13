@@ -30,8 +30,8 @@ jobs:
       - name: set PATH, check mingw version, cmake generate, build and install
         shell: cmd
         run: |
-          set JAVA_HOME=${{ github.workspace }}\graalvm-jdk-17_windows-x64_bin\graalvm-jdk-17.0.8+9.1;
-          set PATH=%JAVA_HOME%\bin;
+          set JAVA_HOME=${{ github.workspace }}\graalvm-jdk-17_windows-x64_bin\graalvm-jdk-17.0.8+9.1
+          set PATH=%JAVA_HOME%\bin
           echo %PATH% &&^
           echo %JAVA_HOME% &&^
           native-image.cmd --version &&^
