@@ -1,0 +1,53 @@
+name: release-actions-workflow
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'c*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ windows-2022 ]
+    runs-on: ${{ matrix.os }}
+    env:
+      targetZip: ${{ github.event.repository.name }}-${{ github.ref_name }}-graalvm-jdk-17.0.8+9.1.zip
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          
+      - name: curl x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
+        shell: cmd
+        run: |
+          curl https://download.oracle.com/graalvm/17/latest/graalvm-jdk-17_windows-x64_bin.zip -L -O &&^
+          7z.exe x graalvm-jdk-17_windows-x64_bin.zip -o"graalvm-jdk-17_windows-x64_bin"
+          
+      - name: set PATH, check mingw version, cmake generate, build and install
+        shell: cmd
+        run: |
+          set JAVA_HOME=^
+          ${{ github.workspace }}\graalvm-jdk-17_windows-x64_bin\graalvm-jdk-17.0.8+9.1;
+          set PATH=^
+          %JAVA_HOME%\bin;
+          native-image.cmd --version &&^
+          javac LibEnvMap.java &&^
+          native-image.cmd -H:Name=libenvmap --shared &&^
+          dir /s
+          
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
+        with:
+          type: 'zip'
+          filename: "${{ env.targetZip }}"
+
+      - name: Release prebuilt
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "${{ env.targetZip }}"
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
