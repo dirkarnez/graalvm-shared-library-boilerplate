@@ -38,28 +38,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include <stdio.h>
+#include <stdlib.h>
 
-import java.util.Map;
-import org.graalvm.nativeimage.IsolateThread;
-import org.graalvm.nativeimage.c.function.CEntryPoint;
-import org.graalvm.nativeimage.c.type.CCharPointer;
-import org.graalvm.nativeimage.c.type.CTypeConversion;
+#include "libenvmap.h"
 
-public class LibEnvMap {
-    //NOTE: this class has no main() method
-
-    @CEntryPoint(name = "filter_env")
-    private static int filterEnv(IsolateThread thread, CCharPointer cFilter) {
-        String filter = CTypeConversion.toJavaString(cFilter);
-        Map<String, String> env = System.getenv();
-        int count = 0;
-        for (String envName : env.keySet()) {
-            if(!envName.contains(filter)) continue;
-            System.out.format("%s=%s%n",
-                            envName,
-                            env.get(envName));
-            count++;
-        }
-        return count;
+int main(int argc, char **argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <filter>\n", argv[0]);
+        exit(1);
     }
+
+    graal_isolate_t *isolate = NULL;
+    graal_isolatethread_t *thread = NULL;
+
+    if (graal_create_isolate(NULL, &isolate, &thread) != 0) {
+        fprintf(stderr, "initialization error\n");
+        return 1;
+    }
+
+    printf("Number of entries: %d\n", filter_env(thread, argv[1]));
+
+    graal_tear_down_isolate(thread);
 }
