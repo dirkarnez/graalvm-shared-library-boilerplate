@@ -6,45 +6,111 @@ on:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
       - 'c*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
+
+
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ windows-latest ]
     runs-on: ${{ matrix.os }}
-    env:
-      targetZip: ${{ github.event.repository.name }}-${{ github.ref_name }}-graalvm-jdk-17.0.8+9.1.zip
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-2022]
+        include:
+          - os: ubuntu-latest
+            asset_name: linux-amd64
+            gu_binary: gu
+          - os: macos-latest
+            asset_name: darwin-amd64
+            gu_binary: gu
+          - os: windows-2022
+            asset_name: windows-amd64
+            gu_binary: gu.cmd
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
+      - uses: actions/checkout@v2
+
+      - if: ${{ matrix.os == 'windows-2022' }}
+        name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - uses: graalvm/setup-graalvm@v1
         with:
-          msbuild-architecture: x64
-          vs-version: latest
-          
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-          
-      - name: curl x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
+          version: '22.3.1'
+          java-version: '17'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Cache local Maven repository
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ~/.m2/repository
+      #     key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-maven-
+
+      # - if: ${{ matrix.os == 'windows-2022' }}
+      #   name: Build native executable
+      #   run: |
+      #     call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+      #     mvnw.cmd -V install -s maven-settings.xml -Pdistribution -Pnative -Pwindows -am -pl quarkus/cli -Dquarkus.native.native-image-xmx=5G
+      #   shell: cmd
+
+      # - if: ${{ matrix.os != 'windows-2022' }}
+      #   name: Build native executable
+      #   run: ./mvnw -V install -s maven-settings.xml -Pdistribution -Pnative -am -pl quarkus/cli
+
+      - if: ${{ matrix.os == 'windows-2022' }}
+        name: Build native executable
         shell: cmd
         run: |
-          curl https://download.oracle.com/graalvm/17/latest/graalvm-jdk-17_windows-x64_bin.zip -L -O &&^
-          7z.exe x graalvm-jdk-17_windows-x64_bin.zip -o"graalvm-jdk-17_windows-x64_bin"
-          
-      - name: set PATH, check mingw version, cmake generate, build and install
-        shell: cmd
-        run: |
-          set JAVA_HOME=${{ github.workspace }}\graalvm-jdk-17_windows-x64_bin\graalvm-jdk-17.0.8+9.1
-          set PATH=%JAVA_HOME%\bin
-          echo %PATH% &&^
-          echo %JAVA_HOME% &&^
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" &&^
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
           native-image.cmd --version &&^
           javac LibEnvMap.java &&^
           native-image.cmd -H:Name=libenvmap --shared &&^
           dir /s
+
+
+
+
+
+# jobs:
+#   build:
+#     strategy:
+#       matrix:
+#         os: [ windows-latest ]
+#     runs-on: ${{ matrix.os }}
+#     env:
+#       targetZip: ${{ github.event.repository.name }}-${{ github.ref_name }}-graalvm-jdk-17.0.8+9.1.zip
+#     steps:
+#       - uses: actions/checkout@v3
+      
+#       - name: Add msbuild to PATH
+#         uses: microsoft/setup-msbuild@v1.1
+#         with:
+#           msbuild-architecture: x64
+#           vs-version: latest
+          
+#       - uses: ilammy/msvc-dev-cmd@v1
+#         with:
+#           arch: x64
+          
+#       - name: curl x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
+#         shell: cmd
+#         run: |
+#           curl https://download.oracle.com/graalvm/17/latest/graalvm-jdk-17_windows-x64_bin.zip -L -O &&^
+#           7z.exe x graalvm-jdk-17_windows-x64_bin.zip -o"graalvm-jdk-17_windows-x64_bin"
+          
+#       - name: set PATH, check mingw version, cmake generate, build and install
+#         shell: cmd
+#         run: |
+#           set JAVA_HOME=${{ github.workspace }}\graalvm-jdk-17_windows-x64_bin\graalvm-jdk-17.0.8+9.1
+#           set PATH=%JAVA_HOME%\bin
+#           echo %PATH% &&^
+#           echo %JAVA_HOME% &&^
+#           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" &&^
+#           native-image.cmd --version &&^
+#           javac LibEnvMap.java &&^
+#           native-image.cmd -H:Name=libenvmap --shared &&^
+#           dir /s
           
       - name: Archive Release
         uses: thedoctor0/zip-release@master
