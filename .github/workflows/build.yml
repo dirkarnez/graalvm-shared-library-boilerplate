@@ -122,7 +122,7 @@ jobs:
         # libenvmap_dynamic.h
         
       - name: Archive Release
-        uses: thedoctor0/zip-release@master
+        uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
           path: |
