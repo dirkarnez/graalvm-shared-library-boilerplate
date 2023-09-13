@@ -111,11 +111,25 @@ jobs:
 #           javac LibEnvMap.java &&^
 #           native-image.cmd -H:Name=libenvmap --shared &&^
 #           dir /s
-          
+
+
+        # graal_isolate.h
+        # graal_isolate_dynamic.h
+        # libenvmap.build_artifacts.txt
+        # libenvmap.dll
+        # libenvmap.h
+        # libenvmap.lib
+        # libenvmap_dynamic.h
+        
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
+          path: |
+            *.h
+            *.build_artifacts.txt
+            *.dll
+            *.lib
           filename: "${{ env.targetZip }}"
 
       - name: Release prebuilt
