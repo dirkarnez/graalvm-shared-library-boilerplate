@@ -21,7 +21,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
         with:
           msbuild-architecture: x64
-          vs-version: '[17.1)'
+          vs-version: latest
           
       # - uses: ilammy/msvc-dev-cmd@v1
       #   with:
