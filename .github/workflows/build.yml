@@ -40,9 +40,9 @@ jobs:
           set PATH=%JAVA_HOME%\bin
           echo %PATH% &&^
           echo %JAVA_HOME% &&^
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" native-image.cmd --version &&^
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" native-image.cmd --version &&^
           javac LibEnvMap.java &&^
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" native-image.cmd -H:Name=libenvmap --shared &&^
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" native-image.cmd -H:Name=libenvmap --shared &&^
           dir /s
           
       - name: Archive Release
