@@ -59,7 +59,7 @@ jobs:
         run: |
           native-image --version && \
           javac LibEnvMap.java && \
-          native-image.cmd -H:Name=libenvmap --shared && \
+          native-image -H:Name=libenvmap --shared && \
           ps
 
       - if: ${{ matrix.os == 'windows-2022' }}
