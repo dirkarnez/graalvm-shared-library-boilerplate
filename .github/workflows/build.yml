@@ -10,16 +10,16 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ windows-2022 ]
+        os: [ windows-latest ]
     runs-on: ${{ matrix.os }}
     env:
       targetZip: ${{ github.event.repository.name }}-${{ github.ref_name }}-graalvm-jdk-17.0.8+9.1.zip
     steps:
       - uses: actions/checkout@v3
       
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
+      # - uses: ilammy/msvc-dev-cmd@v1
+      #   with:
+      #     arch: x64
           
       - name: curl x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
         shell: cmd
